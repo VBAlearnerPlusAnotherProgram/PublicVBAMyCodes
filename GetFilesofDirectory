@@ -1,0 +1,29 @@
+Sub GetFilesofDirectory()
+  Const filesDirectory = "\*.*"
+  Dim strDirectory As String, strPathName As String
+  Dim myArray As Variant, i As Integer, PasteRange As Range
+  With Application.FileDialog(msoFileDialogFolderPicker)
+    If .Show = True Then
+      strDirectory = .SelectedItems(1) 
+    End If
+  End With
+  If strDirectory = "" Then Exit Sub
+  strPathName = Dir(strDirectory & filesDirectory, vbNormal)
+  i = 0
+  ReDim myArray(i)
+  Do While strPathName <> "" ' ファイルが見つからなくなるまでLoop
+        myArray(i) = strPathName
+      strPathName = Dir()
+      If strPathName <> "" Then
+          i = i + 1
+          ReDim Preserve myArray(i)
+      End If
+  Loop
+  myArray = WorksheetFunction.Transpose(myArray) '縦方向の二次元配列に変換
+  With ActiveWorkbook.ActiveSheet
+      Set PasteRange = .Range(.Cells(ActiveCell.Row, ActiveCell.Column), .Cells(ActiveCell.Row + i, ActiveCell.Column))
+      If WorksheetFunction.CountBlank(PasteRange) = i Then Exit Sub
+      PasteRange = myArray
+  End With
+  Set PasteRange = Nothing
+End Sub
